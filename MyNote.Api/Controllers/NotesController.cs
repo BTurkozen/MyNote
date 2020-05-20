@@ -1,0 +1,19 @@
+﻿using MyNote.Api.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+
+namespace MyNote.Api.Controllers
+{
+    public class NotesController : BaseApiController
+    {
+        [HttpGet]
+        public IQueryable<Note> List()
+        {
+            return db.Notes;
+        }
+    }
+}
