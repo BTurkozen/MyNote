@@ -26,10 +26,10 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home</a>
+                        <a class="nav-link" href="">Home</a>
                     </li>
                 </ul>
-                <ul class="navbar-nav navbar-login">
+                <ul class="navbar-nav navbar-login only-logged-out">
                     <li class="nav-item">
                         <a class="nav-link" href="#pills-signin">Log In</a>
                     </li>
@@ -37,9 +37,9 @@
                         <a class="nav-link" href="#pills-signup">Register</a>
                     </li>
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav only-logged-in">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Logout</a>
+                        <a id="btnLogout" class="nav-link" href="#">Logout</a>
                     </li>
                 </ul>
             </div>
