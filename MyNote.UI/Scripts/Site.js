@@ -1,12 +1,10 @@
 ﻿// GLOBALS
 var apiUrl = "https://localhost:44362/";
+var selectedNote = null;
+var selectedLink = null;
 
 // FUNCTIONS
 function checkLogin() {
-    // todo: sessionstorage ve localstorage da tutulan login bilgilerine bakarak
-    // login olup olmadığına karar ver ve eğer logins uygulamayı aç
-    // login değilse login/register sayfasını göster
-
     var loginData = getLoginData();
 
     if (!loginData || !loginData.access_token) {
@@ -14,26 +12,43 @@ function checkLogin() {
         return;
     }
 
-    //token'ı geçerlimi ? 
-    $.ajax({
-        url: apiUrl + "api/Account/UserInfo",
-        type: "GET",
-        headers: { Authorization: "Bearer " + login.access_token },
-        success: function (data) {
+    // is token valid?
+    ajax("api/Account/UserInfo", "GET", null,
+        function (data) {
             showAppPage();
         },
-        error: function () {
+        function () {
             showLoginPage();
-        }
-    });
+        });
 }
-
 
 function showAppPage() {
     $(".only-logged-out").hide();
     $(".only-logged-in").show();
     $(".page").hide();
-    $("#page-app").show();
+
+    // retrieve the notes
+    ajax("api/Notes/List", "GET", null,
+        function (data) {
+
+            $("#notes").html("");
+            for (var i = 0; i < data.length; i++) {
+
+                var a = $("<a/>")
+                    .attr("href", "#")
+                    .addClass("list-group-item list-group-item-action show-note")
+                    .text(data[i].Title)
+                    .prop("note", data[i]);
+
+                $("#notes").append(a);
+            }
+
+            // show page when it's ready
+            $("#page-app").show();
+        },
+        function () {
+
+        });
 }
 
 function showLoginPage() {
@@ -43,20 +58,45 @@ function showLoginPage() {
     $("#page-login").show();
 }
 
+function getAuthHeader() {
+    return { Authorization: "Bearer " + getLoginData().access_token };
+}
+
+function ajax(url, type, data, successFunc, errorFunc) {
+    $.ajax({
+        url: apiUrl + url,
+        type: type,
+        data: data,
+        headers: getAuthHeader(),
+        success: successFunc,
+        error: errorFunc
+    });
+}
+
+function updateNote() {
+    ajax("api/Notes/Update/" + selectedNote.Id, "PUT",
+        { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
+        function (data) {
+            selectedLink.note = data;
+            selectedLink.text = data.Title;
+        },
+        function () {
+
+        }
+    );
+}
+
 function getLoginData() {
-    // todo: sessionstorage da, eğer orada bulamadıysan
-    // localstorage da kayıtlı login data yı json'dan object'e dönüştür ve yolla
-    // eğer yoksa null yolla
     var json = sessionStorage["login"] || localStorage["login"];
 
     if (json) {
         try {
-            return JSON.parse(json)
+            return JSON.parse(json);
         } catch (e) {
-            return null; 
-        }  
+            return null;
+        }
     }
-    return null; 
+    return null;
 }
 
 function success(message) {
@@ -114,6 +154,7 @@ $(document).ajaxStop(function () {
     $(".loading").addClass("d-none");
 });
 
+// register
 $("#signupform").submit(function (event) {
     event.preventDefault();
     var formData = $(this).serialize();
@@ -127,6 +168,7 @@ $("#signupform").submit(function (event) {
 
 });
 
+// login
 $("#signinform").submit(function (event) {
     event.preventDefault();
     var formData = $(this).serialize();
@@ -148,8 +190,8 @@ $("#signinform").submit(function (event) {
         setTimeout(function () {
             resetLoginForms();
             showAppPage();
-        },
-            1000);
+        }, 1000);
+
     }).fail(function (xhr) {
         errorMessage(xhr.responseJSON.error_description);
     });
@@ -171,6 +213,7 @@ $(".navbar-login a").click(function (event) {
     $('#pills-tab a[href="' + href + '"]').tab('show'); // Select tab by name
 });
 
+// logout
 $("#btnLogout").click(function (event) {
     event.preventDefault();
     sessionStorage.removeItem("login");
@@ -178,6 +221,28 @@ $("#btnLogout").click(function (event) {
     showLoginPage();
 });
 
-//ACTIONS
+$("body").on("click", ".show-note", function (event) {
+    event.preventDefault();
+    selectedLink = this;
+    selectedNote = this.note;
+    $("#title").val(selectedNote.Title);
+    $("#content").val(selectedNote.Content);
+
+    $(".show-note").removeClass("active");
+    $(this).addClass("active");
+});
+
+$("#frmNote").submit(function (event) {
+    event.preventDefault();
+
+    if (selectedNote) {
+        updateNote();
+    }
+    else {
+        addNote();
+    }
+});
+
+// ACTIONS
 checkLogin();
 
