@@ -33,14 +33,7 @@ function showAppPage() {
 
             $("#notes").html("");
             for (var i = 0; i < data.length; i++) {
-
-                var a = $("<a/>")
-                    .attr("href", "#")
-                    .addClass("list-group-item list-group-item-action show-note")
-                    .text(data[i].Title)
-                    .prop("note", data[i]);
-
-                $("#notes").append(a);
+                addMenuLink(data[i]);
             }
 
             // show page when it's ready
@@ -49,6 +42,23 @@ function showAppPage() {
         function () {
 
         });
+}
+
+function addMenuLink(note, isActive = false) {
+    var a = $("<a/>")
+        .attr("href", "#")
+        .addClass("list-group-item list-group-item-action show-note")
+        .text(note.Title)
+        .prop("note", note);
+
+    if (isActive) {
+        $(".show-note").removeClass("active");
+        a.addClass("active");
+        selectedLink = a.get(0);
+        selectedNote = note;
+    }
+
+    $("#notes").prepend(a);
 }
 
 function showLoginPage() {
@@ -73,12 +83,24 @@ function ajax(url, type, data, successFunc, errorFunc) {
     });
 }
 
+function addNote() {
+    ajax("api/Notes/New", "POST",
+        { Title: $("#title").val(), Content: $("#content").val() },
+        function (data) {
+            addMenuLink(data, true);
+        },
+        function () {
+
+        }
+    );
+}
+
 function updateNote() {
     ajax("api/Notes/Update/" + selectedNote.Id, "PUT",
         { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
         function (data) {
             selectedLink.note = data;
-            selectedLink.text = data.Title;
+            $(selectedLink).text(data.Title);
         },
         function () {
 
@@ -145,6 +167,14 @@ function resetLoginForms() {
     });
 }
 
+function resetNoteForm() {
+    selectedLink = null;
+    selectedNote = null;
+    $(".show-note").removeClass("active");
+    $("#title").val("");
+    $("#content").val("");
+}
+
 // EVENTS
 $(document).ajaxStart(function () {
     $(".loading").removeClass("d-none");
@@ -165,7 +195,6 @@ $("#signupform").submit(function (event) {
     }).fail(function (xhr) {
         error(xhr.responseJSON.ModelState);
     });
-
 });
 
 // login
@@ -198,6 +227,10 @@ $("#signinform").submit(function (event) {
 
 });
 
+$(".add-new-note").click(function () {
+    resetNoteForm();
+});
+
 // https://getbootstrap.com/docs/4.0/components/navs/#events
 $('#login a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
     // e.target // newly activated tab
@@ -216,8 +249,9 @@ $(".navbar-login a").click(function (event) {
 // logout
 $("#btnLogout").click(function (event) {
     event.preventDefault();
-    sessionStorage.removeItem("login");
-    localStorage.removeItem("login");
+    resetNoteForm();
+    sessionStorage.removeItem["login"];
+    localStorage.removeItem["login"];
     showLoginPage();
 });
 
@@ -243,6 +277,27 @@ $("#frmNote").submit(function (event) {
     }
 });
 
+$("#btnDelete").click(function () {
+    if (selectedNote) {
+        if (confirm("Are you sure to delete the selected note?")) {
+
+
+            ajax("api/Notes/Delete/" + selectedNote.Id, "DELETE", null,
+                function (data) {
+                    $(selectedLink).remove();
+                    resetNoteForm();
+
+                },
+                function () {
+                });
+        }
+    }
+    else {
+        if (confirm("Are you sure to delete the draft? ")) {
+            resetNoteForm();
+        }
+    }
+});
+
 // ACTIONS
 checkLogin();
-
