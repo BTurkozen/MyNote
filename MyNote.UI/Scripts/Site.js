@@ -1,5 +1,7 @@
 ﻿// GLOBALS
-var apiUrl = "https://localhost:44362/";
+//var apiUrl = "https://localhost:44362/";
+var apiUrl = "https://mynoteapi.burakturkozen.com/";
+
 var selectedNote = null;
 var selectedLink = null;
 
@@ -100,7 +102,7 @@ function updateNote() {
         { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
         function (data) {
             selectedLink.note = data;
-            $(selectedLink).text(data.Title);
+            selectedLink.textContent = data.Title;
         },
         function () {
 
@@ -195,6 +197,7 @@ $("#signupform").submit(function (event) {
     }).fail(function (xhr) {
         error(xhr.responseJSON.ModelState);
     });
+
 });
 
 // login
@@ -227,10 +230,6 @@ $("#signinform").submit(function (event) {
 
 });
 
-$(".add-new-note").click(function () {
-    resetNoteForm();
-});
-
 // https://getbootstrap.com/docs/4.0/components/navs/#events
 $('#login a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
     // e.target // newly activated tab
@@ -250,9 +249,14 @@ $(".navbar-login a").click(function (event) {
 $("#btnLogout").click(function (event) {
     event.preventDefault();
     resetNoteForm();
-    sessionStorage.removeItem["login"];
-    localStorage.removeItem["login"];
+    sessionStorage.removeItem("login");
+    localStorage.removeItem("login");
     showLoginPage();
+});
+
+// clear selection and form
+$(".add-new-note").click(function () {
+    resetNoteForm();
 });
 
 $("body").on("click", ".show-note", function (event) {
@@ -277,23 +281,23 @@ $("#frmNote").submit(function (event) {
     }
 });
 
+// delete note
 $("#btnDelete").click(function () {
     if (selectedNote) {
         if (confirm("Are you sure to delete the selected note?")) {
-
-
             ajax("api/Notes/Delete/" + selectedNote.Id, "DELETE", null,
                 function (data) {
                     $(selectedLink).remove();
                     resetNoteForm();
-
                 },
                 function () {
-                });
+
+                }
+            );
         }
     }
     else {
-        if (confirm("Are you sure to delete the draft? ")) {
+        if (confirm("Are you sure to delete the draft?")) {
             resetNoteForm();
         }
     }

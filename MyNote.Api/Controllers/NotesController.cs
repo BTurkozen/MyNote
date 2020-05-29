@@ -63,28 +63,31 @@ namespace MyNote.Api.Controllers
             }
             return BadRequest(ModelState);
         }
-
+               
         [HttpPut]
-        public IHttpActionResult Update(int? id, UpdateNoteDto uDto)
+        public IHttpActionResult Update(int? id, UpdateNoteDto dto)
         {
-            if (id == null || id != uDto.Id || id != null)
+            if (id == null || dto == null || id != dto.Id)
             {
                 return BadRequest();
             }
+
             var note = db.Notes.FirstOrDefault(x => x.Id == id && x.AuthorId == UserId);
 
             if (note == null)
             {
                 return NotFound();
             }
+
             if (ModelState.IsValid)
             {
-                note.Title = uDto.Title;
-                note.Content = uDto.Content;
+                note.Title = dto.Title;
+                note.Content = dto.Content;
                 note.ModificationTime = DateTime.Now;
                 db.SaveChanges();
                 return Ok(note.ToNoteDto());
             }
+
             return BadRequest(ModelState);
         }
 
