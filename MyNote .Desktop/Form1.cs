@@ -34,6 +34,13 @@ namespace MyNote.Desktop
         private async void btnListNote_Click(object sender, EventArgs e)
         {
                 string token = await GetTokenAsync();
+
+            if (token == null)
+            {
+                lstNote.DataSource = null;
+                MessageBox.Show("Kullanıcı adı yada parola yanlış!");
+                return;
+            }
                // MessageBox.Show(token);
                 List<Note> notes = await GetNotes(token);
                 lstNote.DataSource = notes;

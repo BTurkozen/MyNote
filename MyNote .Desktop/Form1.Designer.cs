@@ -66,7 +66,7 @@
             this.btnListNote.Font = new System.Drawing.Font("Cambria", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.btnListNote.Location = new System.Drawing.Point(403, 39);
             this.btnListNote.Name = "btnListNote";
-            this.btnListNote.Size = new System.Drawing.Size(124, 93);
+            this.btnListNote.Size = new System.Drawing.Size(135, 93);
             this.btnListNote.TabIndex = 2;
             this.btnListNote.Text = "List Notes";
             this.btnListNote.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@
             // lstNote
             // 
             this.lstNote.FormattingEnabled = true;
-            this.lstNote.Location = new System.Drawing.Point(21, 211);
+            this.lstNote.Location = new System.Drawing.Point(21, 168);
             this.lstNote.Name = "lstNote";
             this.lstNote.Size = new System.Drawing.Size(158, 290);
             this.lstNote.TabIndex = 8;
@@ -102,7 +102,7 @@
             // 
             // txtNote
             // 
-            this.txtNote.Location = new System.Drawing.Point(186, 212);
+            this.txtNote.Location = new System.Drawing.Point(186, 169);
             this.txtNote.Multiline = true;
             this.txtNote.Name = "txtNote";
             this.txtNote.Size = new System.Drawing.Size(352, 289);
@@ -112,7 +112,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Cambria", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label4.Location = new System.Drawing.Point(18, 184);
+            this.label4.Location = new System.Drawing.Point(18, 141);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(51, 22);
             this.label4.TabIndex = 10;
@@ -122,7 +122,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Cambria", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label5.Location = new System.Drawing.Point(182, 184);
+            this.label5.Location = new System.Drawing.Point(182, 141);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(78, 22);
             this.label5.TabIndex = 11;
@@ -132,7 +132,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(551, 515);
+            this.ClientSize = new System.Drawing.Size(551, 464);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtNote);
