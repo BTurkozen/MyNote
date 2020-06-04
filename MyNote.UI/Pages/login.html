@@ -13,7 +13,7 @@
                     <div class="col-sm-12 border border-primary shadow rounded py-4">
                         <h1 class="mb-3 text-center">Login</h1>
                         <!--<div class="text-center"><img src="https://placehold.it/80x80" class="rounded-circle border p-1"></div>-->
-                        <div class="alert message"></div>
+                        <messages></messages>
                         <form method="post" id="signinform" ng-submit="loginSubmit()">
                             <input type="hidden" name="grant_type" value="password" />
                             <div class="form-group">
@@ -42,7 +42,7 @@
                     <div class="col-sm-12 border border-primary shadow rounded py-4">
                         <h1 class="mb-3 text-center">Register</h1>
                         <!--<div class="text-center"><img src="https://placehold.it/80x80" class="rounded-circle border p-1"></div>-->
-                        <div class="alert message"></div>
+                        <messages></messages>
                         <form method="post" id="signupform" ng-submit="registerSubmit()">
                             <div class="form-group">
                                 <label class="font-weight-bold">Email</label>
@@ -93,8 +93,3 @@
     </div>
 </div>
 
-<h1>{{loginForm}}</h1>
-<br />
-<h1>{{rememberMe}}</h1>
-<br />
-<h1>{{registerForm}}</h1>

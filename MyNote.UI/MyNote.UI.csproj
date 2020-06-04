@@ -77,6 +77,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\brands.css" />
     <Content Include="Content\brands.min.css" />
+    <Content Include="Content\favicon-16x16.png" />
+    <Content Include="Content\favicon.ico" />
     <Content Include="Content\fontawesome-all.css" />
     <Content Include="Content\fontawesome-all.min.css" />
     <Content Include="Content\fontawesome.css" />
@@ -91,6 +93,7 @@
     <Content Include="Content\svg-with-js.min.css" />
     <Content Include="Content\v4-shims.css" />
     <Content Include="Content\v4-shims.min.css" />
+    <Content Include="Directives\messages.html" />
     <Content Include="index2.html" />
     <Content Include="index.html" />
     <Content Include="Pages\app.html" />

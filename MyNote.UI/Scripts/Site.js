@@ -1,36 +1,147 @@
 ﻿//AngularJS Version
+
 //uygulama başlatıldı.
+var apiUrl = "https://mynoteapi.kod.fun/"
 var app = angular.module("myApp", ["ngRoute"]);
+
+app.directive("messages", function () {
+    return {
+        templateUrl: "Directives/messages.html"
+    }
+});
 
 //route config
 app.config(function ($routeProvider) {
     $routeProvider
         .when("/", { templateUrl: "Pages/app.html", controller: "appController" })
         .when("/login", { templateUrl: "Pages/login.html", controller: "loginController" })
-});
+
+
+})
+    .run(function ($rootScope, $location) {
+
+        $rootScope.loginData = function () {
+            var loginDataJson = localStorage["login"] || sessionStorage["login"];
+
+            if (!loginDataJson) {
+                return null;
+            }
+            try {
+
+                return JSON.parse(loginDataJson);
+
+            } catch (e) {
+
+                return null;
+            }
+        };
+
+        $rootScope.isLoggedIn = function () {
+            if ($rootScope.loginData()) {
+                return true;
+            }
+            return false;
+        };
+
+        //https://stackoverflow.com/questions/11541695/redirecting-to-a-certain-route-based-on-condition/11542936#11542936
+        $rootScope.$on("$routeChangeStart", function (event, next, current) {
+
+            if ($rootScope.loginData() == null) {
+                // no logged user, we should be going to #login
+                if (next.templateUrl != "pages/login.html") {
+                    // not going to #login, we should redirect now
+                    $location.path("/login");
+                }
+            }
+        });
+
+
+    });
 
 //htmlden sorumlu ana controller
-app.controller("mainController", function ($scope) {
-    $scope.test = "Hello main"
-    $scope.checkAuth = function () {
-        var tokenJson = localStorage["token"] | sessionStorage["token"];
+app.controller("mainController", function ($scope, $http, $location) {
 
-        if (!tokenJson) {
-            console.log("giriş yapılmamış");
-            //Display Login/Register view
-            return "";
+    $scope.isLoading = false;
+
+    $scope.showLoading = function () {
+        $scope.isLoading = true;
+    };
+
+    $scope.hideLoading = function () {
+        $scope.isLoading = false;
+    };
+
+
+
+    $scope.token = function () {
+        var loginData = $scope.loginData();
+        if (!loginData) {
+            return null;
         }
 
-        //Check if token is valid
+        return loginData.access_token;
+    }
 
-        //Display app view
+    $scope.logout = function () {
+        localStorage.removeItem("login");
+        sessionStorage.removeItem("login");
+        $location.path("/login");
+    }
+
+    $scope.ajax = function (apiUri, method, data, isAuth, successFunc, errorFunc) {
+
+        $scope.showLoading();
+        var headers = null;
+
+        if (isAuth) {
+            headers = { Authorization: "Bearer " + $scope.token() };
+        };
+
+        $http({
+            url: apiUrl + apiUri,
+            method: method,
+            headers: headers,
+            data: data
+        }).then(
+            function (response) {
+                successFunc(response);
+                $scope.hideLoading();
+            },
+            function (response) {
+                errorFunc(response);
+                $scope.hideLoading();
+            });
     };
+
+    $scope.checkAuth = function () {
+        if ($scope.loginData()) {
+            $scope.ajax("api/Account/UserInfo", "get", null, true,
+                function (response) {
+                    if (response.data.Email != $scope.loginData().userName) {
+                        $scope.logout();
+                    }
+                },
+                function (response) {
+                    if (response.status == 401) {
+                        $scope.logout();
+                    }
+                });
+
+        }
+    };
+
 
     $scope.checkAuth();
 });
 
 //login view
-app.controller("loginController", function ($scope) {
+app.controller("loginController", function ($scope, $timeout, $location, $httpParamSerializer) {
+
+    $scope.currentTab = "login"; // login | register
+    $scope.messageFor = "login"; // login | register
+    $scope.messageType = "info"; // success | warning | danger | info
+    $scope.messages = []; // string array ["message 1", "message 2"]
+
     $scope.registerForm = {
         Email: "",
         Password: "",
@@ -45,19 +156,91 @@ app.controller("loginController", function ($scope) {
 
     $scope.rememberMe = false;
 
-    $scope.registerSubmit = function () {
-        alert("register submit");
+    $scope.error = function (data) {
+        $scope.messageFor = $scope.currentTab;
+        $scope.messageType = "danger";
+        $scope.messages = [];
+        var errors = [];
+        if (data.ModelState) {
+            for (var prop in data.ModelState) {
+                for (var index in data.ModelState[prop]) {
+                    errors.push(data.ModelState[prop][index]);
+                }
+            }
+        }
+        if (data.error_description) {
+            $scope.messages.push(data.error_description);
+        }
+
     };
 
-    $scope.loginSubmit = function (){
-        alert("login submit");
+    $scope.success = function (message) {
+        $scope.messageFor = $scope.currentTab;
+        $scope.messageType = "success";
+        $scope.messages = [message];
+
     };
+
+    $scope.resetRegisterForm = function () {
+        $scope.registerForm.Email = "";
+        $scope.registerForm.Password = "";
+        $scope.registerForm.ConfirmPassword = "";
+    };
+
+    $scope.resetLoginForm = function () {
+        $scope.loginForm.username = "";
+        $scope.loginForm.password = "";
+        $scope.rememberMe = false;
+    };
+
+    $scope.$watch("currentTab", function () {
+        //console.log("degıştı: " + $scope.currentTab);
+        $scope.resetLoginForm();
+        $scope.resetRegisterForm();
+        $scope.messages = [];
+    });
+
+    $scope.registerSubmit = function () {
+
+        $scope.ajax("api/Account/Register", "post", $scope.registerForm, false,
+            function (response) {
+                $scope.resetRegisterForm();
+                $scope.success("Your account has been successfully created");
+            },
+            function (response) {
+                $scope.error(response.data);
+            }
+        );
+    };
+
+    $scope.loginSubmit = function () {
+
+        $scope.ajax("Token", "post", $httpParamSerializer($scope.loginForm), false,
+            function (response) {
+                localStorage.removeItem("login");
+                sessionStorage.removeItem("login");
+                var storage = $scope.rememberMe ? localStorage : sessionStorage;
+                storage["login"] = JSON.stringify(response.data);
+                $scope.resetRegisterForm();
+                $scope.success("Your login is successfully. Redirecting...");
+                $timeout(function () {
+                    $location.path("/");
+                }, 1000);
+            },
+            function (response) {
+                console.log(response)
+                $scope.error(response.data);
+            }
+        );
+    };
+
 });
 
 //app view
 app.controller("appController", function ($scope, $location) {
-
-    $location.path("/login"); // loginde işimiz bitince sileceğiz.
+    //if (!$scope.loginData()) { // parantez silindi burada
+    //    $location.path("/login"); // loginde işimiz bitince sileceğiz.
+    //}
 });
 
 
@@ -74,5 +257,15 @@ $(function () {
         e.preventDefault()
         $(this).tab('show')
     });
+
+    // https://stackoverflow.com/questions/37769900/how-to-change-a-scope-variable-outside-the-controller-in-angularjs
+    // https://www.hiren.dev/2014/06/how-to-access-scope-variable-outside.html
+    $('body').on('shown.bs.tab', 'a[data-toggle="pill"]', function (e) {
+        var $scope = angular.element($('[ng-view]')[0]).scope();
+        $scope.currentTab = $(e.target).attr("id") == "pills-signup-tab" ? "register" : "login";
+        $scope.$apply();
+        //e.target // newly activated tab
+        //e.relatedTarget // previous active tab
+    })
 });
 
